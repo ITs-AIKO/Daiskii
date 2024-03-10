@@ -45,7 +45,8 @@ daiskii "https://i.pinimg.com/originals/7c/f8/2c/7cf82cd4ab4b62161d822f779edccc9
 
 ## Result
 
-[Original.](https://i.pinimg.com/originals/7c/f8/2c/7cf82cd4ab4b62161d822f779edccc98.jpg)
+[The Original Image.](https://i.pinimg.com/originals/7c/f8/2c/7cf82cd4ab4b62161d822f779edccc98.jpg)
+
 ![Preview.](https://i.imgur.com/gFtmbO0.png)
 
 ## Reference
