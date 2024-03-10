@@ -55,7 +55,7 @@ daiskii Image Quality
 - **Quality**: The quality of the generated ASCII art, the default value is `100 characters by 100 characters`, it can be:
     - `very_low` 50 characters by 50 characters.
     - `low` 200 characters by 200 characters.
-    - `medium` 300 characters by 300 characters.
+    - `medium` or `med` 300 characters by 300 characters.
     - `high` 500 characters by 500 characters.
     - `very_high` 700 characters by 700 characters.
 
