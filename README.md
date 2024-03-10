@@ -33,13 +33,15 @@ daiskii "https://i.pinimg.com/originals/7c/f8/2c/7cf82cd4ab4b62161d822f779edccc9
 
 1 - Move the executable file to a specific directory.
 
-2 - Open the command line in any directory and run the command:
+2 - Set that directory as a Path environment variable.
+
+3 - Open the command line in any directory and run the command:
 
 ```bash
 daiskii "https://i.pinimg.com/originals/7c/f8/2c/7cf82cd4ab4b62161d822f779edccc98.jpg" med
 ```
 
-3 - You may need to zoom out using `ctrl`+`-` (minus sign) or `ctrl`+`scroll wheel`.
+4 - You may need to zoom out using `ctrl`+`-` (minus sign) or `ctrl`+`scroll wheel`.
 
 ## Result
 
