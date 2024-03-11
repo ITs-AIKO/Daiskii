@@ -16,6 +16,12 @@
 
 Download the app from [**here**](https://github.com/ITs-AIKO/Daiskii/raw/main/assets/daiskii.exe).
 
+## Usage
+
+```bash
+cargo run "https://i.pinimg.com/originals/7c/f8/2c/7cf82cd4ab4b62161d822f779edccc98.jpg" med
+```
+
 
 ## Usage (Normal usage)
 
