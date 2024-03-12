@@ -22,7 +22,7 @@ cargo run "https://i.pinimg.com/originals/7c/f8/2c/7cf82cd4ab4b62161d822f779edcc
 
 ## Normal Usage
 
-1 - Download the executable from [**here**](https://github.com/ITs-AIKO/Daiskii/releases/download/0.1/daiskii.exe).
+1 - Download the executable from [**here**](https://github.com/ITs-AIKO/Daiskii/releases/download/0.1.1/daiskii.exe).
 
 2 - Start a cmd in the same folder as the executable you just downloaded.
 
