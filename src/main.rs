@@ -1,3 +1,4 @@
+use clap::{arg, command, ArgAction};
 use image::{DynamicImage, GenericImageView, Rgba};
 use reqwest::blocking::get;
 use std::env;
@@ -5,27 +6,90 @@ use std::path::Path;
 use url::Url;
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
+    let matches = command!()
+        .version("0.1")
+        .author("Aiko")
+        .about("A way to generate ASCII art from images!")
 
-    if args.len() < 2 {
-        println!("DAISKII: Please enter a valid Path or URL!");
-        return;
+        .arg(
+            arg!(
+                [URI] "The URL or the local path of the image you want to create ASCII art of."
+            )
+            .required(true)
+        )
+
+        .arg(
+            arg!(
+                -q --quality <Quality> "The quality of the generated ASCII art can be 'very low', 'low', 'medium', 'high', or 'very high'."
+            )
+            .required(false)
+        )
+
+        .arg(
+            arg!(
+                -f --force <ForceBlack> "The generated ASCII will use black instead of gray (Zoom out before using this command for better results.)."
+            )
+            .required(false)
+            .action(ArgAction::SetFalse)
+        )
+
+        .arg(
+            arg!(
+                -p --palette <Palette> "It takes a list of characters, and the generated ASCII art will be based on the provided characters (Zoom out before using this command for better results). You can even use emojis like '😌😊😒' BUT DO IT AT YOUR OWN RISK."
+            )
+            .required(false)
+        )
+
+        .get_matches();
+
+    if let Some(url) = matches.get_one::<String>("URI") {
+        if is_it(&url) {
+            return;
+        }
+
+        let size = match matches.get_one::<String>("quality") {
+            Some(quality) => match quality.to_lowercase().as_str() {
+                "very_low" | "vl" => 50,
+                "low" | "l" => 200,
+                "medium" | "med" | "m" => 300,
+                "high" | "h" => 500,
+                "very_high" | "vh" => 700,
+                _ => {
+                    println!("DAISKII: Invalid quality option: {}! Please keep it empty or use: 'very_low', 'low', 'medium', 'high', 'very_high' ", quality);
+                    return;
+                }
+            },
+            None => 250,
+        };
+
+        let black = matches
+            .get_one::<bool>("force")
+            .map_or(true, |force| !force);
+
+        let ascii_chars: Vec<char> = matches
+            .get_one::<String>("palette")
+            .map_or(
+                if black {
+                    String::from("@#S%?+;:,. ") // Use String::from for clarity
+                } else {
+                    String::from("@#S%?+;:,.") // Add a space for non-black case
+                },
+                |user_chars| user_chars.to_string(), // Use user input if available
+            )
+            .chars()
+            .collect();
+
+        if is_path(&url) {
+            draw_from_path(&url, size, ascii_chars);
+        } else if is_url(&url) {
+            draw_from_url(&url, size, ascii_chars);
+        } else {
+            println!("DAISKII: Please check the Path or URL and try again.");
+            return;
+        }
     }
 
-    let url = &args[1];
-
-    if is_it(url) {
-        return;
-    }
-
-    if is_path(url) {
-        draw_from_path(url)
-    } else if is_url(url) {
-        draw_from_url(url)
-    } else {
-        println!("DAISKII: Please check the Path or URL and try again.");
-        return;
-    }
+    0;
 }
 
 fn is_url(url: &str) -> bool {
@@ -39,7 +103,7 @@ fn is_path(url: &str) -> bool {
     Path::new(url).exists()
 }
 
-fn draw_from_url(url: &String) {
+fn draw_from_url(url: &String, size: u32, ascii_chars: Vec<char>) {
     let response = match get(url) {
         Ok(response) => response,
         Err(_err) => {
@@ -56,26 +120,6 @@ fn draw_from_url(url: &String) {
         }
     };
 
-    let size;
-
-    match env::args().nth(2) {
-        Some(quality_str) => {
-            let quality = quality_str.to_lowercase();
-            match quality.as_str() {
-                "very_low" => size = 50,
-                "low" => size = 200,
-                "medium" | "med" => size = 300,
-                "high" => size = 500,
-                "very_high" => size = 700,
-                _ => {
-                    println!("DAISKII: Invalid quality option: {}! Please keep it empty or use: 'very_low', 'low', 'medium', 'high', 'very_high' ", quality);
-                    return;
-                }
-            }
-        }
-        None => size = 100,
-    }
-
     let img = match image::load_from_memory(&bytes) {
         Ok(img) => img,
         Err(_err) => {
@@ -84,40 +128,10 @@ fn draw_from_url(url: &String) {
         }
     };
 
-    draw(img, size)
+    draw(img, size, ascii_chars)
 }
 
-fn draw_from_url_custom_size(url: &String, size: u32) {
-    let response = match get(url) {
-        Ok(response) => response,
-        Err(_err) => {
-            eprintln!("DAISKII: Invalid URL format! Please check the URL and try again.");
-            return;
-        }
-    };
-
-    let bytes = match response.bytes() {
-        Ok(bytes) => bytes,
-        Err(_err) => {
-            eprintln!("DAISKII: Error reading image bytes! Please check the URL and try again.");
-            return;
-        }
-    };
-
-    let size = size;
-
-    let img = match image::load_from_memory(&bytes) {
-        Ok(img) => img,
-        Err(_err) => {
-            eprintln!("DAISKII: Error loading image! Please check the URL and try again.");
-            return;
-        }
-    };
-
-    draw(img, size)
-}
-
-fn draw_from_path(url: &String) {
+fn draw_from_path(url: &String, size: u32, ascii_chars: Vec<char>) {
     let img = match image::open(url) {
         Ok(img) => img,
         Err(_err) => {
@@ -128,37 +142,15 @@ fn draw_from_path(url: &String) {
         }
     };
 
-    let size;
-
-    match env::args().nth(2) {
-        Some(quality_str) => {
-            let quality = quality_str.to_lowercase();
-            match quality.as_str() {
-                "very_low" => size = 50,
-                "low" => size = 200,
-                "medium" | "med" => size = 300,
-                "high" => size = 500,
-                "very_high" => size = 700,
-                _ => {
-                    println!("DAISKII: Invalid quality option: {}! Please keep it empty or use: 'very_low', 'low', 'medium', 'high', 'very_high' ", quality);
-                    return;
-                }
-            }
-        }
-        None => size = 100,
-    }
-
-    draw(img, size)
+    draw(img, size, ascii_chars);
 }
 
-fn draw(img: DynamicImage, size: u32) {
+fn draw(img: DynamicImage, size: u32, ascii_chars: Vec<char>) {
     let img = img.resize(size, size, image::imageops::FilterType::Nearest);
 
     let img = img.grayscale();
 
     let (width, height) = img.dimensions();
-
-    let ascii_chars = ['@', '#', 'S', '%', '?', '*', '+', ';', ':', ',', '.'];
 
     for y in 0..height {
         for x in 0..width {
@@ -184,7 +176,11 @@ fn brightness(pixel: Rgba<u8>) -> u8 {
 fn is_it(url: &String) -> bool {
     if url.to_lowercase() == "lain" {
         let temp = "https://i.imgur.com/GV2Gqfw.png";
-        draw_from_url_custom_size(&temp.to_string(), 300);
+        draw_from_url(
+            &temp.to_string(),
+            300,
+            vec!['@', '#', 'S', '%', '?', '+', ';', ':', ',', '.'],
+        );
         return true;
     }
     return false;
